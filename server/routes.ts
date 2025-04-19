@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertMeetingSchema, insertTranscriptionSchema, insertSpeakerSchema } from "@shared/schema";
 import { z, ZodError } from "zod";
+import { chatGptRequestSchema, getChatGptResponse } from "./openai";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Meetings API
@@ -178,6 +179,66 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to create speaker" });
     }
   });
+
+  // ChatGPT API
+  app.post("/api/chat", async (req, res) => {
+    try {
+      const { message, prompt } = chatGptRequestSchema.parse(req.body);
+      
+      // Only process if the message appears to be a question
+      const isQuestion = isMessageAQuestion(message);
+      
+      if (!isQuestion) {
+        return res.json({ 
+          response: null,
+          isQuestion: false,
+          message: "Message does not appear to be a question"
+        });
+      }
+      
+      const response = await getChatGptResponse(message, prompt);
+      
+      res.json({
+        response,
+        isQuestion: true,
+        originalMessage: message
+      });
+    } catch (error) {
+      if (error instanceof ZodError) {
+        return res.status(400).json({ 
+          message: "Invalid request data", 
+          errors: error.errors 
+        });
+      }
+      console.error("Error processing ChatGPT request:", error);
+      res.status(500).json({ 
+        message: "Failed to get response from ChatGPT"
+      });
+    }
+  });
+
+  // A simple function to determine if a message is likely a question
+  function isMessageAQuestion(message: string): boolean {
+    const trimmedMessage = message.trim();
+    
+    // Check for question marks
+    if (trimmedMessage.endsWith('?')) {
+      return true;
+    }
+    
+    // Check for common question words/phrases
+    const questionPhrases = [
+      'what', 'why', 'how', 'when', 'where', 'who', 'which', 
+      'can you', 'could you', 'would you', 'will you', 
+      'is there', 'are there', 'do you know'
+    ];
+    
+    const lowerMessage = trimmedMessage.toLowerCase();
+    return questionPhrases.some(phrase => 
+      lowerMessage.startsWith(phrase + ' ') || 
+      lowerMessage.includes(' ' + phrase + ' ')
+    );
+  }
 
   const httpServer = createServer(app);
 
