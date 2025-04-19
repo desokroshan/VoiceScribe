@@ -22,7 +22,7 @@ export function ChatGptResponse({
   if (!isLoading && !response) return null;
 
   return (
-    <Card className={`shadow-lg border-2 border-primary/10 ${className}`}>
+    <Card className={`chatgpt-response-card border-2 border-primary/10 ${className}`}>
       <CardHeader className="pb-2">
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-2">
@@ -35,6 +35,7 @@ export function ChatGptResponse({
             <button 
               onClick={onDismiss}
               className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+              aria-label="Dismiss response"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-x">
                 <path d="M18 6 6 18"/>

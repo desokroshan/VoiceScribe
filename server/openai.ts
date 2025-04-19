@@ -40,8 +40,18 @@ export async function getChatGptResponse(message: string, customPrompt?: string)
     });
 
     return response.choices[0].message.content || "No response from ChatGPT";
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error calling ChatGPT API:", error);
+    
+    // Handle specific OpenAI error types
+    if (error.code === 'insufficient_quota') {
+      return "OpenAI API quota exceeded. Please check your API key or billing details.";
+    } else if (error.status === 429) {
+      return "Rate limit exceeded. Please try again in a few moments.";
+    } else if (error.code === 'invalid_api_key') {
+      return "Invalid API key. Please check your OpenAI API key configuration.";
+    }
+    
     return "Error getting response from ChatGPT. Please try again later.";
   }
 }

@@ -33,7 +33,7 @@ Try to keep your responses brief and to the point, as this is being used during 
 // Form schema for ChatGPT settings
 const chatGptSettingsSchema = z.object({
   enabled: z.boolean().default(true),
-  customPrompt: z.string().optional(),
+  customPrompt: z.string().default(""),
   autoDetectQuestions: z.boolean().default(true),
 });
 

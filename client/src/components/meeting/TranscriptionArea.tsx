@@ -35,6 +35,11 @@ export function TranscriptionArea({
     customPrompt: "",
     autoDetectQuestions: true
   });
+  
+  // Create a wrapper function to handle type compatibility with ChatGptSettings component
+  const handleSettingsChange = (newSettings: any) => {
+    setChatGptSettings(newSettings);
+  };
   const [chatResponse, setChatResponse] = useState<ChatResponse | null>(null);
   const [isLoadingResponse, setIsLoadingResponse] = useState(false);
   const [lastProcessedIndex, setLastProcessedIndex] = useState(-1);
@@ -148,7 +153,7 @@ export function TranscriptionArea({
           <div className="flex items-center space-x-3">
             <ChatGptSettings
               settings={chatGptSettings}
-              onSettingsChange={setChatGptSettings}
+              onSettingsChange={handleSettingsChange}
             />
             <Button
               size="icon"
