@@ -74,20 +74,31 @@ export async function captureSystemAudio(): Promise<MediaStream> {
       return mockStream;
     }
     
-    // In a real implementation, this would use getDisplayMedia to capture system audio
-    // Note: This is not fully supported across all browsers and may require special permissions
-    // @ts-ignore - TypeScript doesn't recognize the mediaSource option
+    // For system audio, we need to request screen sharing with audio
+    // This is the most reliable way to get system audio in browsers that support it
     const stream = await navigator.mediaDevices.getDisplayMedia({
-      audio: {
-        echoCancellation: true,
-        noiseSuppression: true,
-        autoGainControl: true,
-      },
-      video: false,
+      video: true, // We need to request video to get the dialog, but we'll remove it later
+      audio: true, // Request audio
     });
     
-    audioStream = stream;
-    return stream;
+    // Check if we got audio tracks
+    const audioTracks = stream.getAudioTracks();
+    if (audioTracks.length === 0) {
+      throw new Error('No audio track was captured. The user may have denied audio permission or the browser doesn\'t support system audio capture.');
+    }
+    
+    // Remove video tracks if present - we only want audio
+    const videoTracks = stream.getVideoTracks();
+    videoTracks.forEach(track => {
+      stream.removeTrack(track);
+      track.stop(); // Stop the video track to save resources
+    });
+    
+    // Create a new stream with only audio tracks
+    const audioOnlyStream = new MediaStream(audioTracks);
+    
+    audioStream = audioOnlyStream;
+    return audioOnlyStream;
   } catch (error) {
     console.error('Error capturing system audio:', error);
     

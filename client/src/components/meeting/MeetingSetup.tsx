@@ -7,7 +7,7 @@ import { Laptop, Mic, Video, Plus, X } from "lucide-react";
 import { format } from "date-fns";
 
 interface MeetingSetupProps {
-  onStartTranscription: (meetingName: string, enableSpeakerIdentification: boolean) => void;
+  onStartTranscription: (meetingName: string, enableSpeakerIdentification: boolean, audioSource: AudioSource) => void;
   onCancel: () => void;
 }
 
@@ -19,7 +19,8 @@ export function MeetingSetup({ onStartTranscription, onCancel }: MeetingSetupPro
   const [enableSpeakerIdentification, setEnableSpeakerIdentification] = useState(true);
   
   const handleStartTranscription = () => {
-    onStartTranscription(meetingName, enableSpeakerIdentification);
+    // Pass the selected audio source to the parent component
+    onStartTranscription(meetingName, enableSpeakerIdentification, selectedSource);
   };
   
   const audioSources = [

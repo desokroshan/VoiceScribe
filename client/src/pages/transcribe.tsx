@@ -7,7 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Transcription } from "@shared/schema";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { initializeAudioCapture, stopAudioCapture } from "@/lib/audio-capture";
+import { initializeAudioCapture, stopAudioCapture, captureSystemAudio } from "@/lib/audio-capture";
 import { transcribeSpeech } from "@/lib/transcription";
 
 export default function Transcribe() {
@@ -92,7 +92,11 @@ export default function Transcribe() {
   });
 
   // Start transcription process
-  const handleStartTranscription = async (meetingName: string, enableSpeakerIdentification: boolean) => {
+  const handleStartTranscription = async (
+    meetingName: string, 
+    enableSpeakerIdentification: boolean,
+    audioSource: "system" | "microphone" | "zoom" | "other"
+  ) => {
     try {
       setEnableSpeakerIdentification(enableSpeakerIdentification);
       
@@ -103,8 +107,32 @@ export default function Transcribe() {
       setIsSetupMode(false);
       setIsRecording(true);
       
-      // Initialize audio capture
-      const stream = await initializeAudioCapture();
+      // Capture audio based on selected source
+      let stream: MediaStream;
+      
+      if (audioSource === "system") {
+        try {
+          // Attempt to capture system audio
+          console.log("Attempting to capture system audio...");
+          stream = await captureSystemAudio();
+        } catch (audioError) {
+          console.warn("System audio capture failed, falling back to microphone:", audioError);
+          toast({
+            title: "System Audio Unavailable",
+            description: "System audio capture is not fully supported in browsers without extensions. Falling back to microphone.",
+          });
+          stream = await initializeAudioCapture();
+        }
+      } else if (audioSource === "microphone") {
+        stream = await initializeAudioCapture();
+      } else {
+        // For zoom or other, use microphone as fallback but inform the user
+        toast({
+          title: `${audioSource.charAt(0).toUpperCase() + audioSource.slice(1)} Integration`,
+          description: `Direct ${audioSource} integration requires additional setup. Using microphone as fallback.`,
+        });
+        stream = await initializeAudioCapture();
+      }
       
       // Start speech recognition
       transcribeSpeech(stream, enableSpeakerIdentification, (transcript) => {
@@ -118,7 +146,10 @@ export default function Transcribe() {
       
       toast({
         title: "Recording Started",
-        description: "Your meeting is now being transcribed."
+        description: "Your meeting is now being transcribed using " + 
+          (audioSource === "system" ? "system audio" : 
+           audioSource === "microphone" ? "microphone" : 
+           audioSource + " (via microphone)")
       });
     } catch (error) {
       console.error("Failed to start transcription:", error);
