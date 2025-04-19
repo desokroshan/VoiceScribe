@@ -7,7 +7,7 @@ import { Laptop, Mic, Video, Plus, X } from "lucide-react";
 import { format } from "date-fns";
 
 interface MeetingSetupProps {
-  onStartTranscription: (enableSpeakerIdentification: boolean) => void;
+  onStartTranscription: (meetingName: string, enableSpeakerIdentification: boolean) => void;
   onCancel: () => void;
 }
 
