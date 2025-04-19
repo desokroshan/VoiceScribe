@@ -29,11 +29,16 @@ export const meetings = pgTable("meetings", {
   actionItems: text("action_items"),
 });
 
-export const insertMeetingSchema = createInsertSchema(meetings).pick({
-  name: true,
-  userId: true,
-  date: true,
-});
+export const insertMeetingSchema = createInsertSchema(meetings)
+  .pick({
+    name: true,
+    userId: true,
+    date: true,
+  })
+  .transform((data) => ({
+    ...data,
+    date: typeof data.date === 'string' ? new Date(data.date) : data.date,
+  }));
 
 export type InsertMeeting = z.infer<typeof insertMeetingSchema>;
 export type Meeting = typeof meetings.$inferSelect;
@@ -47,12 +52,17 @@ export const transcriptions = pgTable("transcriptions", {
   content: text("content").notNull(),
 });
 
-export const insertTranscriptionSchema = createInsertSchema(transcriptions).pick({
-  meetingId: true,
-  timestamp: true,
-  speaker: true,
-  content: true,
-});
+export const insertTranscriptionSchema = createInsertSchema(transcriptions)
+  .pick({
+    meetingId: true,
+    timestamp: true,
+    speaker: true,
+    content: true,
+  })
+  .transform((data) => ({
+    ...data,
+    timestamp: typeof data.timestamp === 'string' ? new Date(data.timestamp) : data.timestamp,
+  }));
 
 export type InsertTranscription = z.infer<typeof insertTranscriptionSchema>;
 export type Transcription = typeof transcriptions.$inferSelect;
