@@ -58,7 +58,7 @@ export const insertTranscriptionSchema = z.object({
     z.date(),
     z.string().transform(str => new Date(str))
   ]),
-  speaker: z.string().optional(),
+  speaker: z.string().nullable(), // Allow null for speaker
   content: z.string()
 });
 

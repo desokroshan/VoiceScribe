@@ -92,12 +92,12 @@ export default function Transcribe() {
   });
 
   // Start transcription process
-  const handleStartTranscription = async (enableSpeakerIdentification: boolean) => {
+  const handleStartTranscription = async (meetingName: string, enableSpeakerIdentification: boolean) => {
     try {
       setEnableSpeakerIdentification(enableSpeakerIdentification);
       
       // Create a new meeting in the database
-      await createMeetingMutation.mutateAsync("Marketing Team Weekly");
+      await createMeetingMutation.mutateAsync(meetingName);
       
       // Setup is complete, show transcription UI
       setIsSetupMode(false);
@@ -110,9 +110,9 @@ export default function Transcribe() {
       transcribeSpeech(stream, enableSpeakerIdentification, (transcript) => {
         // Add transcription to database and state
         addTranscriptionMutation.mutate({
-          speaker: transcript.speaker,
+          speaker: transcript.speaker || null,
           content: transcript.content,
-          timestamp: new Date().toISOString()
+          timestamp: new Date() // Use Date object directly, the schema will handle conversion
         });
       });
       

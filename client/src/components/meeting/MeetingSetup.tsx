@@ -19,7 +19,7 @@ export function MeetingSetup({ onStartTranscription, onCancel }: MeetingSetupPro
   const [enableSpeakerIdentification, setEnableSpeakerIdentification] = useState(true);
   
   const handleStartTranscription = () => {
-    onStartTranscription(enableSpeakerIdentification);
+    onStartTranscription(meetingName, enableSpeakerIdentification);
   };
   
   const audioSources = [

@@ -34,13 +34,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/meetings", async (req, res) => {
     try {
-      const meetingData = insertMeetingSchema.parse(req.body);
+      // Handle date conversion explicitly to ensure it's properly processed
+      const data = {
+        ...req.body,
+        date: req.body.date ? new Date(req.body.date) : new Date()
+      };
+      
+      const meetingData = insertMeetingSchema.parse(data);
       const meeting = await storage.createMeeting(meetingData);
       res.status(201).json(meeting);
     } catch (error) {
       if (error instanceof ZodError) {
+        console.error("Zod validation error:", error.errors);
         return res.status(400).json({ message: "Invalid meeting data", errors: error.errors });
       }
+      console.error("Server error:", error);
       res.status(500).json({ message: "Failed to create meeting" });
     }
   });
@@ -114,7 +122,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const transcriptionData = {
         ...req.body,
-        meetingId
+        meetingId,
+        timestamp: req.body.timestamp ? new Date(req.body.timestamp) : new Date()
       };
       
       const validatedData = insertTranscriptionSchema.parse(transcriptionData);
