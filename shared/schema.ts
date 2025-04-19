@@ -2,6 +2,22 @@ import { pgTable, text, serial, integer, boolean, timestamp } from "drizzle-orm/
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
+// Define AI response schemas
+export const chatRequestSchema = z.object({
+  message: z.string().min(1, "Message is required"),
+  prompt: z.string().optional(),
+});
+
+export const chatResponseSchema = z.object({
+  response: z.string().nullable(),
+  isQuestion: z.boolean(),
+  originalMessage: z.string().optional(),
+  message: z.string().optional(),
+});
+
+export type ChatRequest = z.infer<typeof chatRequestSchema>;
+export type ChatResponse = z.infer<typeof chatResponseSchema>;
+
 // User model for authentication
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
