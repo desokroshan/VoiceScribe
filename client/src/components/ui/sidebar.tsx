@@ -48,16 +48,15 @@ export function Sidebar() {
         <ul>
           {navItems.map((item) => (
             <li key={item.href} className="mb-1 px-2">
-              <Link href={item.href}>
-                <a
-                  className={cn(
-                    "flex items-center py-2 px-3 rounded-lg text-gray-300 hover:bg-gray-800 hover:text-white transition-colors duration-200",
-                    location === item.href && "bg-gray-800 text-white"
-                  )}
-                >
-                  <span className="text-xl w-8 text-center">{item.icon}</span>
-                  <span className="ml-3 hidden md:block">{item.label}</span>
-                </a>
+              <Link 
+                href={item.href}
+                className={cn(
+                  "flex items-center py-2 px-3 rounded-lg text-gray-300 hover:bg-gray-800 hover:text-white transition-colors duration-200",
+                  location === item.href && "bg-gray-800 text-white"
+                )}
+              >
+                <span className="text-xl w-8 text-center">{item.icon}</span>
+                <span className="ml-3 hidden md:block">{item.label}</span>
               </Link>
             </li>
           ))}

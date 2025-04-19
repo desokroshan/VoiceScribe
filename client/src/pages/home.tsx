@@ -8,7 +8,10 @@ import { FileText, Clock, Mic, Calendar, ChevronRight } from "lucide-react";
 import { format } from "date-fns";
 
 export default function Home() {
-  const [_, navigate] = useLocation();
+  const [_, setLocation] = useLocation();
+  
+  // Function to navigate programmatically
+  const navigate = (path: string) => setLocation(path);
   
   const { data: meetings, isLoading } = useQuery<Meeting[]>({
     queryKey: ["/api/meetings"],
